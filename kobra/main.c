@@ -1,8 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <ncurses.h>
 #include <string.h>
 #include <time.h>
+
+#include <ncurses.h>
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+
+
+
 
 //Struct Kobra character
 typedef struct{
@@ -24,15 +31,35 @@ void moveKobra(Kobra *kobra, int *direction);
 void spawnFood(Food *food, int col, int row);
 void optionsMenu();
 
+
+
+
+
+
 int lastMove = 0;
 
 int main()
 {
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+    printf("Erro ao iniciar SDL: %s\n", SDL_GetError());
+    return 1;
+}
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("Erro ao iniciar SDL_mixer: %s\n", Mix_GetError());
+        return 1;
+    }
+
+    Mix_Chunk *eatSound = Mix_LoadWAV("audio/eatsound.wav");
+    Mix_Music *bgMusic = Mix_LoadMUS("audio/bgmusic.wav");
+
     while(true){
         initscr();
         cbreak();
         noecho();
         curs_set(0);
+
+        Mix_PlayMusic(bgMusic, -1);
         int gamePoint = gameMenu();
         if(gamePoint == 1){
             srand(time(NULL));
@@ -87,6 +114,7 @@ int main()
                     kobra.bodyX = realloc(kobra.bodyX, sizeof(int) * kobra.length);
                     kobra.bodyY = realloc(kobra.bodyY, sizeof(int) * kobra.length);
                     spawnFood(&food, col, row);
+                    Mix_PlayChannel(-1, eatSound, 0);
 
                 }
                 else{
@@ -365,5 +393,10 @@ void optionsMenu(){
         clear();
     }
 }
+
+void gameSound(){
+
+}
+
 
 
